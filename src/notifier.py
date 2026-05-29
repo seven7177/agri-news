@@ -74,3 +74,16 @@ class Notifier:
             + "\n".join(error_lines)
         )
         return self._push(f"抓取异常 | {date_str}", content)
+
+
+if __name__ == "__main__":
+    import sys
+    from src.config import load_config
+
+    config = load_config()
+    notifier = Notifier(config)
+    if "--failure" in sys.argv:
+        notifier._push(
+            "三农日报任务失败",
+            f"# 任务失败\n\n时间：{__import__('datetime').datetime.now().isoformat()}\n\n请检查 GitHub Actions 日志。"
+        )
