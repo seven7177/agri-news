@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三农新闻日报</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; background: #f9fafb; color: #1a1a1a; }
+  h1 { color: #2d5016; font-size: 1.8em; border-bottom: 3px solid #4a7c2e; padding-bottom: 10px; }
+  h2 { color: #4a7c2e; margin-top: 40px; }
+  .date-list { list-style: none; padding: 0; }
+  .date-list li { margin: 8px 0; padding: 10px 16px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .date-list a { color: #1a73e8; text-decoration: none; font-weight: 500; }
+  .date-list a:hover { text-decoration: underline; }
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #e0e0e0; color: #888; font-size: 0.9em; }
+</style>
+</head>
+<body>
+  <h1>三农新闻日报</h1>
+  <p>农业农村政策与产业动态简报 -- 每日自动生成</p>
+  <p class="setup-tip" style="background:#fff3cd;padding:8px 16px;border-radius:6px;font-size:0.9em;">
+    <strong>部署提示：</strong>使用前请将下方 <code>YOUR_USER/YOUR_REPO</code> 替换为你的 GitHub 用户名和仓库名。
+  </p>
+  <h2>历史日报</h2>
+  <ul class="date-list" id="date-list">
+    <li>加载中...</li>
+  </ul>
+  <footer>
+    <p>由 agri-news-bot 自动生成 | 数据来源：15 家官方媒体</p>
+  </footer>
+  <script>
+    fetch('https://api.github.com/repos/YOUR_USER/YOUR_REPO/contents/data')
+      .then(r => r.json())
+      .then(dirs => {
+        const dates = dirs.filter(d => d.type === 'dir').map(d => d.name).sort().reverse();
+        const list = document.getElementById('date-list');
+        if (dates.length === 0) {
+          list.innerHTML = '<li>暂无数据</li>';
+          return;
+        }
+        list.innerHTML = dates.map(d =>
+          '<li><a href="https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/data/' + d + '/daily_brief.md">' + d + ' 日报</a></li>'
+        ).join('');
+      })
+      .catch(() => {
+        document.getElementById('date-list').innerHTML = '<li>加载失败，请检查仓库设置</li>';
+      });
+  </script>
+</body>
+</html>
