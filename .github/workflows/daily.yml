@@ -1,0 +1,50 @@
+name: 三农新闻日报
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      deep_analysis_topic:
+        description: '深度分析话题（可选）'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  daily-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily task
+        run: python src/main.py
+
+      - name: Commit daily report
+        if: success()
+        run: |
+          git config user.name "agri-news-bot"
+          git config user.email "bot@agri-news.local"
+          git add data/ archive.db
+          git diff --staged --quiet || (git commit -m "日报: $(date +%Y-%m-%d)" && git push)
+
+      - name: Failure notification
+        if: failure()
+        run: python src/notifier.py --failure
+        env:
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
