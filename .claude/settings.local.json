@@ -92,7 +92,10 @@
       "Bash(mv .github/workflows/daily.yml .github/daily.yml.tmp)",
       "Bash(mv .github/workflows .github/workflows_bak)",
       "Bash(mkdir -p .github/workflows)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(mv .github/daily.yml.tmp .github/workflows/daily.yml)",
+      "Bash(rm -rf .github/workflows_bak)",
+      "Bash(rm -f gh.zip)"
     ]
   }
 }
