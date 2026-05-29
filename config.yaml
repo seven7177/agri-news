@@ -1,0 +1,232 @@
+# ============================================================
+# 三农新闻日报 — 系统配置文件
+# ============================================================
+
+llm:
+  provider: deepseek
+  api_key: ${DEEPSEEK_API_KEY}
+  base_url: https://api.deepseek.com/v1
+  model: deepseek-chat
+  max_tokens: 4096
+  temperature: 0.7
+
+# ============================================================
+# 新闻源列表
+# ============================================================
+sources:
+  - name: 人民日报
+    handler: general_news
+    url: https://paper.people.com.cn
+    category_lists:
+      - 综合要闻
+      - 政策法规
+    priority: 1
+    enabled: true
+
+  - name: 新华社
+    handler: general_news
+    url: https://www.xinhuanet.com
+    category_lists:
+      - 综合要闻
+      - 政策法规
+    priority: 1
+    enabled: true
+
+  - name: 央视新闻
+    handler: general_news
+    url: https://news.cctv.com
+    category_lists:
+      - 综合要闻
+    priority: 1
+    enabled: true
+
+  - name: 农民日报
+    handler: agriculture_news
+    url: https://www.farmer.com.cn
+    category_lists:
+      - 政策法规
+      - 产业动态
+      - 乡村振兴
+    filter_keywords:
+      - 农业
+      - 农村
+      - 农民
+      - 乡村振兴
+      - 粮食
+    priority: 1
+    enabled: true
+
+  - name: 中新社
+    handler: general_news
+    url: https://www.chinanews.com.cn
+    category_lists:
+      - 综合要闻
+    priority: 2
+    enabled: true
+
+  - name: 光明日报
+    handler: general_news
+    url: https://www.gmw.cn
+    category_lists:
+      - 综合要闻
+      - 乡村振兴
+    priority: 2
+    enabled: true
+
+  - name: 经济日报
+    handler: general_news
+    url: https://www.ce.cn
+    category_lists:
+      - 市场行情
+      - 产业动态
+    priority: 2
+    enabled: true
+
+  - name: 浙江日报
+    handler: general_news
+    url: https://zjrb.zjol.com.cn
+    category_lists:
+      - 地方实践
+      - 综合要闻
+    priority: 2
+    enabled: true
+
+  - name: 中国蓝新闻
+    handler: general_news
+    url: https://www.cztv.com
+    category_lists:
+      - 地方实践
+    priority: 3
+    enabled: true
+
+  - name: 潮新闻
+    handler: general_news
+    url: https://tidenews.com.cn
+    category_lists:
+      - 地方实践
+      - 综合要闻
+    priority: 3
+    enabled: true
+
+  - name: 浙江在线
+    handler: general_news
+    url: https://www.zjol.com.cn
+    category_lists:
+      - 地方实践
+    priority: 3
+    enabled: true
+
+  - name: 央视网
+    handler: general_news
+    url: https://www.cctv.com
+    category_lists:
+      - 综合要闻
+      - 政策法规
+    priority: 2
+    enabled: true
+
+  - name: 央广网
+    handler: general_news
+    url: https://www.cnr.cn
+    category_lists:
+      - 综合要闻
+    priority: 2
+    enabled: true
+
+  - name: 人民网
+    handler: general_news
+    url: https://www.people.com.cn
+    category_lists:
+      - 综合要闻
+      - 政策法规
+    priority: 1
+    enabled: true
+
+  - name: 都市快报
+    handler: general_news
+    url: https://www.dskb.cn
+    category_lists:
+      - 地方实践
+    priority: 3
+    enabled: true
+
+# ============================================================
+# 爬虫配置
+# ============================================================
+scraper:
+  delay_min: 2
+  delay_max: 5
+  retry_max: 2
+  retry_delay: 10
+  timeout: 15
+  max_articles_per_source: 30
+
+# ============================================================
+# 分析器配置
+# ============================================================
+analyzer:
+  batch_size: 10
+  min_relevance_score: 6
+  min_importance_score: 3
+  categories:
+    - 政策法规
+    - 产业动态
+    - 市场行情
+    - 科技创新
+    - 乡村振兴
+    - 国际农业
+    - 地方实践
+    - 综合要闻
+  prompts:
+    domain: 三农
+    layer1_system: |
+      你是一个新闻分类与筛选助手。请对以下新闻内容进行分类和评分。
+
+      分类标准（8个类别）：
+      - 政策法规：中央及地方农业农村相关政策、法律法规
+      - 产业动态：农业产业发展趋势、企业动态、供应链信息
+      - 市场行情：农产品价格、供需变化、贸易数据
+      - 科技创新：农业科技研发、数字农业、智慧农业
+      - 乡村振兴：乡村建设、人居环境、乡村治理
+      - 国际农业：全球农业动态、国际贸易、国际合作
+      - 地方实践：各省市农业农村创新实践和经验
+      - 综合要闻：泛农业领域重要新闻
+
+      对每篇文章输出：
+      1. 分类标签
+      2. 相关性评分（1-10）
+      3. 重要程度评分（1-10）
+      4. 简短摘要（50字以内）
+    layer2_system: |
+      你是一个新闻简报编辑助手。请基于第一轮筛选出的高价值文章，生成一份结构清晰的三农新闻日报简报。
+
+      输出格式要求：
+      1. 按分类汇总文章，每个分类下按重要程度降序排列
+      2. 每篇文章包含：标题、来源、摘要、重要程度评分
+      3. 每个分类前添加一句话分类导读
+      4. 简报开头添加今日综述（200字以内）
+      5. 简报结尾添加政策风向标（提炼关键政策信号）
+
+# ============================================================
+# 通知配置
+# ============================================================
+notify:
+  enabled: true
+  provider: pushplus
+  pushplus_token: ${PUSHPLUS_TOKEN}
+  success:
+    enabled: true
+    brief_max_chars: 600
+  failure:
+    enabled: true
+    min_failed_sources: 3
+    max_errors: 8
+
+# ============================================================
+# 页面配置
+# ============================================================
+pages:
+  enabled: true
+  title: 三农新闻日报
+  subtitle: 农业农村政策与产业动态简报
+  archive_days: 30
