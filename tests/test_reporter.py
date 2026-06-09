@@ -1,27 +1,45 @@
 from src.reporter import Reporter
 
 
-def test_generate_overview():
-    classified_articles = [
-        {"category": "粮食安全", "importance_score": 5, "title": "夏粮丰收", "summary": "产量创新高", "source": "人民日报"},
-        {"category": "政策法规", "importance_score": 4, "title": "新政策", "summary": "农业农村部发布", "source": "新华社"},
-        {"category": "粮食安全", "importance_score": 3, "title": "收购进度", "summary": "进度快", "source": "农民日报"},
+def test_generate_list():
+    source_results = [
+        {
+            "source": "人民日报",
+            "handler": "people_daily",
+            "articles": [
+                {"title": "浙江夏粮丰收", "url": "https://example.com/1", "publish_time": "2026-05-31"},
+                {"title": "杭州乡村振兴", "url": "https://example.com/2", "publish_time": "2026-05-31"},
+            ],
+        },
+        {
+            "source": "新华社",
+            "handler": "xinhua",
+            "articles": [
+                {"title": "浙江省农业农村政策", "url": "https://example.com/3", "publish_time": ""},
+            ],
+        },
+        {
+            "source": "央视新闻",
+            "handler": "cctv_news",
+            "articles": [],
+        },
     ]
-    category_counts = {"粮食安全": 2, "政策法规": 1, "产业发展": 0}
     metadata = {
-        "total_fetched": 87,
-        "total_filtered": 42,
-        "duration_seconds": 1125,
+        "total_sources": 15,
         "successful_sources": 14,
         "failed_sources": 1,
-        "total_sources": 15,
+        "duration_seconds": 120,
     }
 
-    overview = Reporter.generate_overview("2026-05-29", classified_articles, category_counts, metadata)
-    assert "2026-05-29" in overview
-    assert "粮食安全" in overview
-    assert "夏粮丰收" in overview
-    assert "87" in overview
+    result = Reporter.generate_list("2026-05-31", source_results, metadata)
+    assert "浙江夏粮丰收" in result
+    assert "杭州乡村振兴" in result
+    assert "https://example.com/1" in result
+    assert "人民日报 (2条)" in result
+    assert "新华社 (1条)" in result
+    assert "央视新闻" not in result  # 空的源不显示
+    assert "15 个源" in result
+    assert "命中 3 条" in result
 
 
 def test_generate_archive_page():
@@ -29,6 +47,7 @@ def test_generate_archive_page():
     html = Reporter.generate_archive_page(dates)
     assert "2026-05-29" in html
     assert "2026-05-27" in html
+    assert "浙江三农新闻" in html
 
 
 def test_format_duration():

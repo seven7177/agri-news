@@ -1,28 +1,34 @@
 class Reporter:
     @staticmethod
-    def generate_overview(date_str, classified_articles, category_counts, metadata):
+    def generate_list(date_str, source_results, metadata):
+        """生成按来源分组的链接+标题列表"""
         lines = [
-            f"# 三农新闻日报 — {date_str}",
-            "",
-            "## 今日要点",
+            f"# 浙江三农新闻 — {date_str}",
             "",
         ]
-        top_articles = sorted(classified_articles, key=lambda x: -x.get("importance_score", 0))[:5]
-        for i, article in enumerate(top_articles, 1):
-            lines.append(f"{i}. **{article['title']}** — {article.get('summary', '')}（来源：{article.get('source', '')})")
+
+        total = 0
+        for entry in source_results:
+            articles = entry.get("articles", [])
+            if not articles:
+                continue
+            total += len(articles)
+            lines.append(f"## {entry['source']} ({len(articles)}条)")
+            lines.append("")
+            for a in articles:
+                title = a.get("title", "无标题")
+                url = a.get("url", "")
+                pub_time = a.get("publish_time", "")
+                time_str = f" — {pub_time}" if pub_time else ""
+                lines.append(f"- [{title}]({url}){time_str}")
             lines.append("")
 
-        lines.extend(["", "## 分类统计", ""])
-        lines.append("| 类别 | 数量 |")
-        lines.append("|------|------|")
-        for cat, count in sorted(category_counts.items(), key=lambda x: -x[1]):
-            lines.append(f"| {cat} | {count} |")
-
         lines.extend([
-            "",
             "---",
-            f"> 共抓取 {metadata.get('total_fetched', 0)} 条，筛选 {metadata.get('total_filtered', 0)} 条",
-            f"> 成功源 {metadata.get('successful_sources', 0)}/{metadata.get('total_sources', 0)}，"
+            f"共抓取 {metadata.get('total_sources', 0)} 个源，"
+            f"命中 {total} 条",
+            f"成功 {metadata.get('successful_sources', 0)}/"
+            f"{metadata.get('total_sources', 0)} 个源，"
             f"耗时 {Reporter._format_duration(metadata.get('duration_seconds', 0))}",
         ])
         return "\n".join(lines)
@@ -30,7 +36,7 @@ class Reporter:
     @staticmethod
     def generate_archive_page(dates):
         links = "\n".join(
-            f'<li><a href="archives/{d}.html">{d} 三农日报</a></li>'
+            f'<li><a href="archives/{d}.html">{d} 浙江三农新闻</a></li>'
             for d in sorted(dates, reverse=True)
         )
         return f"""<!DOCTYPE html>
@@ -38,7 +44,7 @@ class Reporter:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>三农新闻日报</title>
+<title>浙江三农新闻</title>
 <style>
 body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; }}
 h1 {{ color: #2d5016; }}
@@ -48,8 +54,8 @@ a:hover {{ text-decoration: underline; }}
 </style>
 </head>
 <body>
-<h1>三农新闻日报</h1>
-<p>农业农村政策与产业动态简报</p>
+<h1>浙江三农新闻</h1>
+<p>浙江农业农村政策与产业动态</p>
 <h2>历史日报</h2>
 <ul>{links}</ul>
 </body>

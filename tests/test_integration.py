@@ -31,16 +31,21 @@ def test_full_data_flow():
         assert loaded["total"] == 1
 
         # 4. 生成报告
-        classified = [
-            {"category": "粮食安全", "importance_score": 5, "title": "夏粮丰收", "summary": "丰收了", "source": "人民日报"},
-            {"category": "乡村振兴", "importance_score": 4, "title": "乡村振兴", "summary": "振兴中", "source": "新华社"},
+        source_results = [
+            {
+                "source": "人民日报",
+                "handler": "people_daily",
+                "articles": [
+                    {"title": "浙江夏粮丰收", "url": "https://example.com/1", "publish_time": "2026-05-29"},
+                    {"title": "杭州乡村振兴", "url": "https://example.com/2", "publish_time": "2026-05-29"},
+                ],
+            },
         ]
-        category_counts = {"粮食安全": 1, "乡村振兴": 1}
-        metadata = {"total_fetched": 2, "total_filtered": 2, "duration_seconds": 120, "successful_sources": 2, "failed_sources": 0, "total_sources": 2}
+        metadata = {"total_fetched": 2, "duration_seconds": 120, "successful_sources": 2, "failed_sources": 0, "total_sources": 2}
 
-        overview = Reporter.generate_overview("2026-05-29", classified, category_counts, metadata)
-        assert "夏粮丰收" in overview
-        storage.save_brief("2026-05-29", overview)
+        report = Reporter.generate_list("2026-05-29", source_results, metadata)
+        assert "浙江夏粮丰收" in report
+        storage.save_brief("2026-05-29", report)
         assert Path(tmp, "2026-05-29", "daily_brief.md").exists()
 
         dedup.close()

@@ -20,7 +20,7 @@ class HttpClient:
         for attempt in range(self.retry_max + 1):
             try:
                 headers = build_headers(referer=referer)
-                with httpx.Client(timeout=self.timeout, follow_redirects=True) as client:
+                with httpx.Client(timeout=self.timeout, follow_redirects=True, trust_env=False) as client:
                     response = client.get(url, headers=headers)
                     response.raise_for_status()
                     if response.charset_encoding:
@@ -46,6 +46,20 @@ class HttpClient:
                     time.sleep(self.retry_delay)
                     continue
         raise FetchError(f"Failed to fetch {url} after {self.retry_max} retries") from last_error
+
+    def fetch_js(self, url):
+        """使用 Playwright 抓取 JS 渲染页面"""
+        from playwright.sync_api import sync_playwright
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page()
+                page.goto(url, wait_until='networkidle', timeout=30000)
+                html = page.content()
+                browser.close()
+                return html
+        except Exception as e:
+            raise FetchError(f"Playwright fetch failed for {url}: {e}") from e
 
     def inter_source_delay(self):
         return random_delay(self.delay_min, self.delay_max)

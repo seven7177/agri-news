@@ -1,7 +1,4 @@
-# ============================================================
-# 三农新闻日报 — 系统配置文件
-# ============================================================
-
+# ===== LLM 配置（暂不使用）=====
 llm:
   provider: deepseek
   api_key: ${DEEPSEEK_API_KEY}
@@ -10,198 +7,178 @@ llm:
   max_tokens: 4096
   temperature: 0.7
 
-# ============================================================
-# 新闻源列表
-# ============================================================
+# ===== 爬虫配置 =====
+scraper:
+  delay_min: 1
+  delay_max: 2
+  retry_max: 1
+  retry_delay: 5
+  timeout: 10
+
+# ===== 农业关键词（全局统一，所有源共用）=====
+agri_keywords:
+  - 农业 - 农村 - 农民 - 农田 - 农户 - 土地
+  - 粮食 - 乡村振兴 - 耕地 - 三农 - 乡村
+  - 渔船 - 渔业 - 渔民 - 水果 - 蔬菜 - 茶叶
+  - 养殖 - 畜牧 - 种植 - 水稻 - 小麦 - 农场
+  - 樱桃 - 杨梅 - 草莓 - 西瓜 - 柑橘 - 椪柑
+  - 葡萄 - 西湖龙井 - 玉米 - 大豆 - 棉花 - 油菜 - 甘蔗
+
+# ===== 浙江地域关键词（全局统一）=====
+region_keywords:
+  - 浙江
+  - 上城 - 下城 - 江干 - 拱墅 - 西湖 - 滨江 - 萧山 - 余杭 - 钱塘 - 临平
+  - 建德 - 富阳 - 临安 - 桐庐 - 淳安
+  - 海曙 - 江东 - 江北 - 北仑 - 镇海 - 鄞州
+  - 余姚 - 慈溪 - 奉化 - 象山 - 宁海
+  - 鹿城 - 龙湾 - 瓯海 - 瑞安 - 乐清 - 洞头
+  - 永嘉 - 平阳 - 苍南 - 文成 - 泰顺
+  - 南湖 - 秀洲 - 海宁 - 平湖 - 桐乡 - 嘉善 - 海盐
+  - 吴兴 - 南浔 - 德清 - 长兴 - 安吉
+  - 越城 - 诸暨 - 上虞 - 嵊州 - 绍兴 - 新昌
+  - 婺城 - 金东 - 兰溪 - 义乌 - 东阳 - 永康 - 武义 - 浦江 - 磐安
+  - 柯城 - 衢江 - 江山 - 常山 - 开化 - 龙游
+  - 定海 - 普陀 - 岱山 - 嵊泗
+  - 椒江 - 黄岩 - 路桥 - 温岭 - 临海 - 玉环 - 三门 - 天台 - 仙居
+  - 莲都 - 龙泉 - 青田 - 缙云 - 遂昌 - 松阳 - 云和 - 庆元 - 景宁
+
+# ===== 新闻源（核心：专题页 + 补充：首页）=====
 sources:
-  - name: 人民日报
-    handler: general_news
-    url: https://paper.people.com.cn
-    category_lists:
-      - 综合要闻
-      - 政策法规
+  - name: 新华网
+    handler: xinhua
+    topic_urls:
+      - https://xczx.news.cn/
+    home_url: https://www.news.cn/
     priority: 1
     enabled: true
 
-  - name: 新华社
-    handler: general_news
-    url: https://www.xinhuanet.com
-    category_lists:
-      - 综合要闻
-      - 政策法规
+  - name: 人民网
+    handler: people_net
+    topic_urls:
+      - http://country.people.com.cn/
+      - http://zj.people.com.cn/
+    home_url: https://www.people.com.cn/
     priority: 1
     enabled: true
 
-  - name: 央视新闻
-    handler: general_news
-    url: https://news.cctv.com
-    category_lists:
-      - 综合要闻
+  - name: 央视网
+    handler: cctv_net
+    topic_urls:
+      - https://sannong.cctv.com/
+    home_url: https://www.cctv.com/
     priority: 1
     enabled: true
 
   - name: 农民日报
-    handler: agriculture_news
-    url: https://www.farmer.com.cn
-    category_lists:
-      - 政策法规
-      - 产业动态
-      - 乡村振兴
-    filter_keywords:
-      - 农业
-      - 农村
-      - 农民
-      - 乡村振兴
-      - 粮食
+    handler: farmers_daily
+    topic_urls:
+      - https://www.farmer.com.cn/
+    home_url: https://www.farmer.com.cn/
+    priority: 1
+    enabled: true
+
+  - name: 央视新闻
+    handler: cctv_news
+    topic_urls: []
+    home_url: https://news.cctv.com/
+    priority: 1
+    enabled: true
+
+  - name: 人民日报
+    handler: people_daily
+    topic_urls:
+      - http://country.people.com.cn/
+      - http://zj.people.com.cn/
+    home_url: https://www.people.com.cn/
     priority: 1
     enabled: true
 
   - name: 中新社
-    handler: general_news
-    url: https://www.chinanews.com.cn
-    category_lists:
-      - 综合要闻
-    priority: 2
-    enabled: true
-
-  - name: 光明日报
-    handler: general_news
-    url: https://www.gmw.cn
-    category_lists:
-      - 综合要闻
-      - 乡村振兴
+    handler: chinanews
+    topic_urls: []
+    home_url: https://www.chinanews.com/
     priority: 2
     enabled: true
 
   - name: 经济日报
-    handler: general_news
-    url: https://www.ce.cn
-    category_lists:
-      - 市场行情
-      - 产业动态
-    priority: 2
-    enabled: true
-
-  - name: 浙江日报
-    handler: general_news
-    url: https://zjrb.zjol.com.cn
-    category_lists:
-      - 地方实践
-      - 综合要闻
-    priority: 2
-    enabled: true
-
-  - name: 中国蓝新闻
-    handler: general_news
-    url: https://www.cztv.com
-    category_lists:
-      - 地方实践
-    priority: 3
-    enabled: true
-
-  - name: 潮新闻
-    handler: general_news
-    url: https://tidenews.com.cn
-    category_lists:
-      - 地方实践
-      - 综合要闻
-    priority: 3
-    enabled: true
-
-  - name: 浙江在线
-    handler: general_news
-    url: https://www.zjol.com.cn
-    category_lists:
-      - 地方实践
-    priority: 3
-    enabled: true
-
-  - name: 央视网
-    handler: general_news
-    url: https://www.cctv.com
-    category_lists:
-      - 综合要闻
-      - 政策法规
+    handler: economic_daily
+    topic_urls: []
+    home_url: https://www.ce.cn/
     priority: 2
     enabled: true
 
   - name: 央广网
-    handler: general_news
-    url: https://www.cnr.cn
-    category_lists:
-      - 综合要闻
+    handler: cnr_news
+    topic_urls:
+      - http://country.cnr.cn/
+    home_url: https://www.cnr.cn/
     priority: 2
     enabled: true
 
-  - name: 人民网
-    handler: general_news
-    url: https://www.people.com.cn
-    category_lists:
-      - 综合要闻
-      - 政策法规
+  - name: 光明日报
+    handler: guangming_daily
+    topic_urls:
+      - https://topics.gmw.cn/node_154048.htm
+    home_url: https://www.gmw.cn/
+    priority: 2
+    enabled: true
+
+  - name: 浙江日报
+    handler: zhejiang_daily
+    topic_urls:
+      - https://zjnews.zjol.com.cn/
+    home_url: https://zjnews.zjol.com.cn/
     priority: 1
     enabled: true
 
+  - name: 浙江在线
+    handler: zjol
+    topic_urls:
+      - https://www.zjol.com.cn/
+    home_url: https://www.zjol.com.cn/
+    priority: 2
+    enabled: true
+
+  - name: 中国蓝新闻
+    handler: cztv
+    topic_urls:
+      - https://www.cztv.com/
+    home_url: https://www.cztv.com/
+    priority: 2
+    enabled: true
+
+  - name: 潮新闻
+    handler: tide_news
+    topic_urls:
+      - https://tidenews.com.cn/
+    home_url: https://tidenews.com.cn/
+    priority: 2
+    enabled: true
+
   - name: 都市快报
-    handler: general_news
-    url: https://www.dskb.cn
-    category_lists:
-      - 地方实践
+    handler: dskb
+    topic_urls:
+      - https://hzdaily.hangzhou.com.cn/dskb/
+    home_url: https://hzdaily.hangzhou.com.cn/dskb/
     priority: 3
     enabled: true
 
-# ============================================================
-# 爬虫配置
-# ============================================================
-scraper:
-  delay_min: 2
-  delay_max: 5
-  retry_max: 2
-  retry_delay: 10
-  timeout: 15
-  max_articles_per_source: 30
-
-# ============================================================
-# 分析器配置
-# ============================================================
-analyzer:
-  batch_size: 10
-  min_relevance_score: 6
-  min_importance_score: 3
-  categories:
-    - 政策法规
-    - 粮食安全
-    - 产业发展
-    - 乡村振兴
-    - 科技兴农
-    - 生态环保
-    - 农产品市场
-    - 其他
-  prompts:
-    domain: 三农
-    layer1_system: "你是{domain}新闻资深编辑。"
-    layer2_system: "你是中国{domain}日报主编。"
-
-# ============================================================
-# 通知配置
-# ============================================================
+# ===== 通知：QQ邮箱 =====
 notify:
   enabled: true
-  provider: pushplus
-  pushplus_token: ${PUSHPLUS_TOKEN}
-  success:
-    enabled: true
-    brief_max_chars: 600
-  failure:
-    enabled: true
-    min_failed_sources: 3
-    max_errors: 8
+  provider: email
+  email:
+    smtp_server: smtp.qq.com
+    smtp_port: 465
+    use_ssl: true
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    to: ${EMAIL_TO}
+    subject_template: "浙江三农新闻 {date}"
 
-# ============================================================
-# 页面配置
-# ============================================================
+# ===== GitHub Pages =====
 pages:
   enabled: true
-  title: 三农新闻日报
-  subtitle: 农业农村政策与产业动态简报
+  title: 浙江三农新闻
+  subtitle: 浙江农业农村政策与产业动态
   archive_days: 30
